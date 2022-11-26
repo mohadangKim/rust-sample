@@ -1,10 +1,11 @@
 use std::error::Error;
 use std::fs;
-
+use std::env;
 
 pub struct Config {
   pub query: String,
   pub filename: String,
+  pub case_sensitive: bool,
 }
 
 impl Config {
@@ -14,8 +15,9 @@ impl Config {
     }
     let query = args[1].clone();
     let filename = args[2].clone();
+    let case_sensitive = env::var("CASE_INSENSITIVE").is_err();
   
-    Ok(Config { query, filename })
+    Ok(Config { query, filename, case_sensitive })
   }  
 }
 
@@ -23,7 +25,15 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
   // 성공하였을 경우 함수 기본 반환 값인 ()를 반환
   // 실패하였을 경우 Box<dyn Error> 트레이트 반환
   let contents = fs::read_to_string(config.filename)?;// ? : 에러 발생하였을 경우 호출자에게 에러 반환
-  for line in search(&config.query, &contents) {
+
+
+  let results = if config.case_sensitive {
+    search(&config.query, &contents)
+  } else {
+    search_case_insensitive(&config.query, &contents)
+  };
+  
+  for line in results {
     println!("{}", line);
   }
 
