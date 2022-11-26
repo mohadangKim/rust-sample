@@ -1,6 +1,7 @@
 use std::env;
 use std::fs;
 use std::process;
+use std::error::Error;
 
 fn main() {
   let args: Vec<String> = env::args().collect();
@@ -13,9 +14,10 @@ fn main() {
   
   println!("검색어 : {}", config.query);
   println!("대상 파일 : {}", config.filename);
-
-  let contents = fs::read_to_string(config.filename).expect("파일을 읽지 못했습니다.");
-  println!("파일 내용:\n{}", contents);
+  if let Err(e) = run(config) {
+    println!("애플리케이션 에러: {}", e);
+    process::exit(1);
+  }
 }
 
 struct Config {
@@ -33,4 +35,13 @@ impl Config {
   
     Ok(Config { query, filename })
   }  
+}
+
+fn run(config: Config) -> Result<(), Box<dyn Error>> {
+  // 성공하였을 경우 함수 기본 반환 값인 ()를 반환
+  // 실패하였을 경우 Box<dyn Error> 트레이트 반환
+  let contents = fs::read_to_string(config.filename)?;// ? : 에러 발생하였을 경우 호출자에게 에러 반환
+  println!("파일 내용:\n{}", contents);
+
+  Ok(())
 }
