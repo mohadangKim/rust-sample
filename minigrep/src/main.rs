@@ -19,6 +19,9 @@ struct Config {
 
 impl Config {
   fn new(args: &[String]) -> Config {
+    if args.len() < 3 {
+      panic!("필요한 인수가 지정되지 않았습니다.");
+    }
     let query = args[1].clone();
     let filename = args[2].clone();
   
